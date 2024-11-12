@@ -1,6 +1,7 @@
 import { createStore } from 'vuex';
 import { createUserWithEmailAndPassword, auth } from "@/auth";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 
 export default createStore({
   state: {
@@ -42,6 +43,17 @@ export default createStore({
       } catch (error) {
         console.log('Error al registrar:', error.message);
         alert('Error al registrar');
+      }
+    },
+    async singIn(context, userData) {
+      try {
+        const { email, password } = userData;
+        const auth = getAuth();
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        console.log(userCredential.user); // Información del usuario
+      } catch (error) {
+        console.log('Error al iniciar sesión:', error.message);
+        throw new Error('Error al iniciar sesión');
       }
     }
   },
