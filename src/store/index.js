@@ -1,6 +1,6 @@
 import { createStore } from 'vuex';
 import { createUserWithEmailAndPassword, auth } from "@/auth";
-import { getFirestore, doc, setDoc } from "firebase/firestore";
+import { getFirestore, collection, query, where, getDocs } from "firebase/firestore";
 import { getAuth, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 
 export default createStore({
@@ -9,6 +9,7 @@ export default createStore({
   },
   getters: {
     isAuthenticated: (state) => !!state.usuario,
+    usuarioDatos: (state) => state.usuario,
   },
   mutations: {
     setUsuario(state,usuario){
@@ -69,8 +70,37 @@ export default createStore({
         console.error('Error al cerrar sesión:', error);
         return Promise.reject(error); // Retornamos la promesa con error
       }
+    },
+    async buscarUsuarioPorEmail({ commit }, email) {
+      try {
+        const db = getFirestore(); // Obtener la referencia a Firestore
+        const usuariosRef = collection(db, "usuario"); // Referencia a la colección "usuario"
+        
+        // Crear la consulta para buscar por correo electrónico
+        const q = query(usuariosRef, where("email", "==", email)); // Filtrar por email
+        
+        // Obtener los resultados de la consulta
+        const querySnapshot = await getDocs(q);
+        
+        if (!querySnapshot.empty) {
+          // Si se encuentra un usuario, obtener los datos
+          const usuarioDoc = querySnapshot.docs[0];
+          const usuarioData = usuarioDoc.data();
+          console.log("Usuario encontrado:", usuarioData);
+    
+          // Puedes guardar el usuario en el estado
+          commit('setUsuario', usuarioData); // Si deseas guardar los datos en Vuex
+          return usuarioData; // Retorna los datos del usuario
+        } else {
+          console.log("No se encontró ningún usuario con ese correo electrónico.");
+          return null; // Si no se encuentra, devuelve null
+        }
+      } catch (error) {
+        console.error("Error al buscar usuario por email:", error);
+        throw new Error("Error al buscar usuario."); // Lanza error si algo sale mal
+      }
     }
-
+    
   },
   modules: {
     // Aquí puedes agregar otros módulos si es necesario
