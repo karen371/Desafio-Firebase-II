@@ -1,26 +1,25 @@
 import { createStore } from 'vuex';
 import { createUserWithEmailAndPassword, auth } from "@/auth";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { getAuth, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 
 export default createStore({
   state: {
-    usuario: {
-      email: '',
-      nombre: '',
-      password: '',
-      apellido: ''
-    }
+    usuario:null
   },
   getters: {
-    // Aquí puedes agregar los getters si es necesario
+    isAuthenticated: (state) => !!state.usuario,
   },
   mutations: {
-    ingUsuario(state, usuario) {
+    setUsuario(state,usuario){
       state.usuario = usuario;
+    },
+    clearUsuario(state){
+      state.usuario = null
     }
   },
   actions: {
+    //registrar usuarios
     async accionRegistrar(context, usuarioData) {
       try {
         console.log('Datos en Vuex:', usuarioData); // Verifica los datos en Vuex
@@ -45,17 +44,33 @@ export default createStore({
         alert('Error al registrar');
       }
     },
+    //Iniciar sesion
     async singIn(context, userData) {
       try {
         const { email, password } = userData;
         const auth = getAuth();
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        console.log(userCredential.user); // Información del usuario
+        console.log(userCredential.user);
+        context.commit('setUsuario',userCredential.user);
       } catch (error) {
         console.log('Error al iniciar sesión:', error.message);
         throw new Error('Error al iniciar sesión');
       }
+    },
+    //cerrar sesion
+    async cerrarSesion({ commit }) {
+      const auth = getAuth();
+      try {
+        await signOut(auth);
+        commit('clearUsuario');
+        console.log('Sesion cerrada');
+        return Promise.resolve(); // Retornamos una promesa exitosa
+      } catch (error) {
+        console.error('Error al cerrar sesión:', error);
+        return Promise.reject(error); // Retornamos la promesa con error
+      }
     }
+
   },
   modules: {
     // Aquí puedes agregar otros módulos si es necesario
