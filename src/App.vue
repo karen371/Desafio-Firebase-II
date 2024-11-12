@@ -15,6 +15,8 @@ export default {
         return 'Inicio de Sesión';
       } else if (this.$route.name === 'home') {
         return 'Bienvenido';
+      }else{
+        return 'pagina x';
       }
     }
   }
