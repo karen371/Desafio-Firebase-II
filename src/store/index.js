@@ -1,3 +1,7 @@
+/**NOTA 
+ * LINK AL HOSTING FIREBASE
+ * https://desadio-firebase2.web.app/
+ */
 import { createStore } from 'vuex';
 import { createUserWithEmailAndPassword, auth } from "@/auth";
 import { getFirestore, collection, query, where, getDocs, setDoc, doc } from "firebase/firestore";
