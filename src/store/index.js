@@ -1,6 +1,6 @@
 import { createStore } from 'vuex';
 import { createUserWithEmailAndPassword, auth } from "@/auth";
-import { getFirestore, collection, query, where, getDocs } from "firebase/firestore";
+import { getFirestore, collection, query, where, getDocs, setDoc, doc } from "firebase/firestore";
 import { getAuth, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 
 export default createStore({
@@ -24,13 +24,15 @@ export default createStore({
     async accionRegistrar(context, usuarioData) {
       try {
         console.log('Datos en Vuex:', usuarioData); // Verifica los datos en Vuex
+        
+        // Registra al usuario con email y contraseña
         const userCredential = await createUserWithEmailAndPassword(
           auth, 
           usuarioData.email, 
           usuarioData.password
         );
         const user = userCredential.user;
-        
+    
         // Si deseas agregar datos adicionales del usuario a Firestore
         const db = getFirestore();
         await setDoc(doc(db, "usuario", user.uid), {
@@ -38,8 +40,12 @@ export default createStore({
           nombre: usuarioData.nombre,
           apellido: usuarioData.apellido
         });
-        
-        alert('Usuario registrado correctamente');
+    
+        // NO actualizamos el estado de Vuex, para que no se inicie sesión automáticamente
+        alert('Usuario registrado correctamente. Por favor inicie sesión.');
+    
+        // O si deseas, puedes cerrar la sesión del usuario después del registro
+        await signOut(auth);  // Cerrar la sesión inmediatamente
       } catch (error) {
         console.log('Error al registrar:', error.message);
         alert('Error al registrar');
