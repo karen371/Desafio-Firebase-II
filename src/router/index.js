@@ -34,27 +34,32 @@ const router = createRouter({
   ]
 });
 
-// Guardia de ruta global para manejar redirección
 router.beforeEach((to, from, next) => {
-  const user = getAuth().currentUser; // Obtener el usuario autenticado desde Firebase
-
-  // Si la ruta requiere autenticación
+  const auth = getAuth();
+  const user = auth.currentUser; // Usuario autenticado (si existe)
+  console.log(user);
+  // Si la ruta requiere autenticación (requiresAuth)
   if (to.meta.requiresAuth) {
     if (!user) {
-      next({ name: 'login' }); // Redirigir a login si no está autenticado
+      // Si el usuario no está autenticado, redirigir a login
+      next({ name: 'login' });
     } else {
-      next(); // Continuar si el usuario está autenticado
+      // Si el usuario está autenticado, permitir la navegación
+      next();
     }
   }
-  // Si la ruta requiere que el usuario no esté autenticado (registro o login)
+  // Si la ruta requiere que el usuario NO esté autenticado (requiresGuest)
   else if (to.meta.requiresGuest) {
     if (user) {
-      next({ name: 'home' }); // Redirigir al home si el usuario ya está autenticado
+      // Si el usuario ya está autenticado, redirigir a home
+      next({ name: 'home' });
     } else {
-      next(); // Continuar si no está autenticado
+      // Si el usuario NO está autenticado, permitir la navegación
+      next();
     }
   } else {
-    next(); // Para todas las demás rutas, continuar sin restricciones
+    // Si la ruta no tiene ninguna de las dos condiciones, permitir la navegación
+    next();
   }
 });
 

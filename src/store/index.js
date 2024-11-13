@@ -105,8 +105,19 @@ export default createStore({
         console.error("Error al buscar usuario por email:", error);
         throw new Error("Error al buscar usuario."); // Lanza error si algo sale mal
       }
-    }
-    
+    },
+    verificarUsuario({ commit }) {
+      const auth = getAuth();
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          // Si hay un usuario autenticado, lo almacenamos en Vuex
+          commit('setUsuario', user);
+        } else {
+          // Si no hay usuario, limpiamos el estado
+          commit('clearUsuario');
+        }
+      });
+    },
   },
   modules: {
     // Aquí puedes agregar otros módulos si es necesario
